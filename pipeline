@@ -1,0 +1,52 @@
+module pip(f,a,b,c,d,clk);
+  parameter N = 10;
+  input [N-1:0] a,b,c,d;
+  input clk;
+  output [N-1:0] f;
+  reg[N-1:0] l12_x1, l12_x2, l12_d, l23_x3, l23_d, l34_f;
+  assign f = l34_f;
+  always@(posedge clk)
+    begin
+      l12_x1 <= #4 a+b;
+      l12_x2 <= #4 c-d;
+      l12_d <= d;
+    end
+  
+  always@(posedge clk)
+    begin
+      l23_x3 <= #4 l12_x1 + l12_x2;
+      l23_d <= l12_d;
+    end
+  
+  always@(posedge clk)
+    l34_f <= #6 l23_x3 * l23_d;
+
+endmodule
+
+
+
+
+module test;
+  parameter N=10;
+  wire[N-1:0] f;
+  reg[N-1:0] a,b,c,d;
+  reg clk;
+  
+  pip one(f,a,b,c,d,clk);
+  
+  initial clk = 0;
+  
+  always #10 clk = ~clk;
+  
+  initial
+    begin
+      #5 a=10; b=12; c=6; d=3; 
+    end
+  
+  initial
+    begin
+      $dumpfile("test.vcd");
+      $dumpvars(1);
+      #100 $finish;
+    end
+endmodule
